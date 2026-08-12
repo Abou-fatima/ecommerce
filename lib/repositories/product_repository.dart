@@ -89,7 +89,6 @@ class ProductRepository {
         filtered.sort((a, b) => b.rating.compareTo(a.rating));
         break;
       case ProductSort.featured:
-      default:
         filtered.sort((a, b) {
           final aFeatured = a.isFeatured ? 1 : 0;
           final bFeatured = b.isFeatured ? 1 : 0;

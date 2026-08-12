@@ -13,13 +13,15 @@ A Flutter e-commerce app built with Riverpod, featuring a product catalog, shopp
 
 ## Riverpod providers used
 
-- `productsProvider` (FutureProvider)
-- `favoritesProvider` (StateNotifierProvider)
-- `cartProvider` (StateNotifierProvider)
-- `filterProvider` (StateNotifierProvider)
-- `sortProvider` (StateNotifierProvider)
-- `cartTotalProvider` (Provider)
-- `profileProvider` (Provider)
+- `productsProvider` (FutureProvider) for product loading
+- `favoritesProvider` (StateNotifierProvider) for saved favorite IDs
+- `cartProvider` (StateNotifierProvider) for cart items
+- `filterProvider` (StateNotifierProvider) for category and featured filtering
+- `sortProvider` (StateNotifierProvider) for catalog sorting
+- `cartTotalProvider` (Provider) for the live total
+- `profileProvider` (Provider) for mock user profile data
+
+The app follows a layered pattern: model → repository → provider → screen.
 
 ## Run
 
