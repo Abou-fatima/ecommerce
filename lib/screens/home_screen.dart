@@ -14,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
     final favorites = ref.watch(favoritesProvider);
     final filter = ref.watch(filterProvider);
     final sort = ref.watch(sortProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Breeze Cart')),
@@ -23,14 +24,7 @@ class HomeScreen extends ConsumerWidget {
             'All',
             ...products.map((product) => product.category).toSet(),
           ];
-          final filteredProducts = ref
-              .read(productRepositoryProvider)
-              .filterAndSort(
-                products,
-                filter.category,
-                filter.featuredOnly,
-                sort,
-              );
+          final filteredProducts = ref.watch(filteredProductsProvider);
 
           return Column(
             children: [
@@ -72,6 +66,20 @@ class HomeScreen extends ConsumerWidget {
                       },
                     ),
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Search products',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    ref.read(searchQueryProvider.notifier).update(value);
+                  },
+                  controller: TextEditingController(text: searchQuery),
                 ),
               ),
               Padding(

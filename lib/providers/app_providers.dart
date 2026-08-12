@@ -108,6 +108,17 @@ final filterProvider =
       return ProductFilterNotifier();
     });
 
+class SearchQueryNotifier extends StateNotifier<String> {
+  SearchQueryNotifier() : super('');
+
+  void update(String value) => state = value;
+  void clear() => state = '';
+}
+
+final searchQueryProvider = StateNotifierProvider<SearchQueryNotifier, String>(
+  (ref) => SearchQueryNotifier(),
+);
+
 class ProductSortNotifier extends StateNotifier<ProductSort> {
   ProductSortNotifier() : super(ProductSort.featured);
 
@@ -120,9 +131,63 @@ final sortProvider = StateNotifierProvider<ProductSortNotifier, ProductSort>((
   return ProductSortNotifier();
 });
 
+final filteredProductsProvider = Provider<List<Product>>((ref) {
+  final productsAsync = ref.watch(productsProvider);
+  final products = productsAsync.asData?.value ?? const <Product>[];
+  final filter = ref.watch(filterProvider);
+  final sort = ref.watch(sortProvider);
+  final query = ref.watch(searchQueryProvider).trim().toLowerCase();
+
+  final filtered = products.where((product) {
+    final matchesCategory =
+        filter.category == 'All' || product.category == filter.category;
+    final matchesFeatured = !filter.featuredOnly || product.isFeatured;
+    final matchesQuery =
+        query.isEmpty ||
+        product.name.toLowerCase().contains(query) ||
+        product.category.toLowerCase().contains(query);
+    return matchesCategory && matchesFeatured && matchesQuery;
+  }).toList();
+
+  switch (sort) {
+    case ProductSort.priceAsc:
+      filtered.sort((a, b) => a.price.compareTo(b.price));
+      break;
+    case ProductSort.priceDesc:
+      filtered.sort((a, b) => b.price.compareTo(a.price));
+      break;
+    case ProductSort.rating:
+      filtered.sort((a, b) => b.rating.compareTo(a.rating));
+      break;
+    case ProductSort.featured:
+      filtered.sort((a, b) {
+        final aFeatured = a.isFeatured ? 1 : 0;
+        final bFeatured = b.isFeatured ? 1 : 0;
+        final featureCompare = bFeatured.compareTo(aFeatured);
+        if (featureCompare != 0) {
+          return featureCompare;
+        }
+        return b.rating.compareTo(a.rating);
+      });
+  }
+
+  return filtered;
+});
+
 final cartTotalProvider = Provider<double>((ref) {
   final cart = ref.watch(cartProvider);
   return cart.values.fold<double>(0, (total, item) => total + item.totalPrice);
+});
+
+final cartItemCountProvider = Provider<int>((ref) {
+  return ref
+      .watch(cartProvider)
+      .values
+      .fold<int>(0, (total, item) => total + item.quantity);
+});
+
+final favoriteCountProvider = Provider<int>((ref) {
+  return ref.watch(favoritesProvider).length;
 });
 
 final profileProvider = Provider<UserProfile>((ref) {
